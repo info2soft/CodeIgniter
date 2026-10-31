@@ -942,7 +942,7 @@ class CI_Loader {
 		 * other views can have access to these variables.
 		 */
 		empty($_ci_vars) OR $this->_ci_cached_vars = array_merge($this->_ci_cached_vars, $_ci_vars);
-		extract($this->_ci_cached_vars);
+		extract($this->_ci_cached_vars, EXTR_SKIP);
 
 		/*
 		 * Buffer the output

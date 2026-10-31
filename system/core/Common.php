@@ -102,14 +102,14 @@ if ( ! function_exists('is_really_writable'))
 		 */
 		if (is_dir($file))
 		{
-			$file = rtrim($file, '/').'/'.md5(mt_rand());
+			$file = rtrim($file, '/').'/'.md5(random_int(0, getrandmax()));
 			if (($fp = @fopen($file, 'ab')) === FALSE)
 			{
 				return FALSE;
 			}
 
 			fclose($fp);
-			@chmod($file, 0777);
+			@chmod($file, 0750);
 			@unlink($file);
 			return TRUE;
 		}
@@ -363,6 +363,13 @@ if ( ! function_exists('is_https'))
 
 		return FALSE;
 	}
+}
+
+if ( ! function_exists('is_swoole')) {
+    function is_swoole()
+    {
+        return defined('CI_SWOOLE');
+    }
 }
 
 // ------------------------------------------------------------------------
@@ -846,4 +853,58 @@ if ( ! function_exists('function_usable'))
 
 		return FALSE;
 	}
+}
+
+if (! function_exists('value')) {
+    /**
+     * Return the default value of the given value.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    function value($value)
+    {
+        return $value instanceof Closure ? $value() : $value;
+    }
+}
+
+if (! function_exists('env')) {
+    /**
+     * Gets the value of an environment variable.
+     *
+     * @param  string  $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    function env($key, $default = null)
+    {
+        $value = getenv($key);
+        if ( ! $value)
+        {
+            return value($default);
+        }
+
+        switch (strtolower($value))
+        {
+            case 'true':
+            case '(true)':
+                return TRUE;
+            case 'false':
+            case '(false)':
+                return FALSE;
+            case 'empty':
+            case '(empty)':
+                return '';
+            case 'null':
+            case '(null)':
+                return NULL;
+        }
+
+        if (preg_match('/\A([\'"])(.*)\1\z/', $value, $matches))
+        {
+            return $matches[2];
+        }
+
+        return $value;
+    }
 }
