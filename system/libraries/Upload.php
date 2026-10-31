@@ -654,7 +654,7 @@ class CI_Upload {
 	{
 		if ($this->encrypt_name === TRUE)
 		{
-			$filename = md5(uniqid(mt_rand())).$this->file_ext;
+			$filename = bin2hex(openssl_random_pseudo_bytes(16)).$this->file_ext;
 		}
 
 		if ($this->overwrite === TRUE OR ! file_exists($path.$filename))
@@ -900,6 +900,19 @@ class CI_Upload {
 		{
 			return FALSE;
 		}
+
+        // 根据文件头获取文件真实类型，暂时只判断非明文类型的文件
+        if (config_item('upload_check_file_type')) {
+            if (isset($this->_mimes[$ext])
+                && $this->_mimes[$ext] !== 'text/plain'
+                && !(is_array($this->_mimes[$ext]) && in_array('text/plain', $this->_mimes[$ext]))
+            ) {
+                $real_type = getFileType($this->file_temp);
+                if (!in_array($real_type, $this->allowed_types, TRUE)) {
+                    return FALSE;
+                }
+            }
+        }
 
 		// Images get some additional checks
 		if (in_array($ext, array('gif', 'jpg', 'jpeg', 'jpe', 'png', 'webp'), TRUE) && @getimagesize($this->file_temp) === FALSE)

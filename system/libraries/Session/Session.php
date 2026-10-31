@@ -283,15 +283,17 @@ class CI_Session {
 	{
 		$expiration = config_item('sess_expiration');
 
-		if (isset($params['cookie_lifetime']))
-		{
-			$params['cookie_lifetime'] = (int) $params['cookie_lifetime'];
-		}
-		else
-		{
-			$params['cookie_lifetime'] = ( ! isset($expiration) && config_item('sess_expire_on_close'))
-				? 0 : (int) $expiration;
-		}
+//		if (isset($params['cookie_lifetime']))
+//		{
+//			$params['cookie_lifetime'] = (int) $params['cookie_lifetime'];
+//		}
+//		else
+//		{
+//			$params['cookie_lifetime'] = ( ! isset($expiration) && config_item('sess_expire_on_close'))
+//				? 0 : (int) $expiration;
+//		}
+
+        $params['cookie_lifetime'] = 0; // 白盒测试漏洞，强制cookie在退出浏览器时过期
 
 		isset($params['cookie_name']) OR $params['cookie_name'] = config_item('sess_cookie_name');
 		if (empty($params['cookie_name']))
@@ -325,14 +327,12 @@ class CI_Session {
 
 		if (is_php('7.3'))
 		{
-			session_set_cookie_params(array(
-				'lifetime' => $params['cookie_lifetime'],
-				'path'     => $params['cookie_path'],
-				'domain'   => $params['cookie_domain'],
-				'secure'   => $params['cookie_secure'],
-				'httponly' => TRUE,
-				'samesite' => $params['cookie_samesite']
-			));
+            ini_set('session.cookie_lifetime', $params['cookie_lifetime']);
+            ini_set('session.cookie_path', $params['cookie_path']);
+            ini_set('session.cookie_domain', $params['cookie_domain']);
+            ini_set('session.cookie_secure', $params['cookie_secure']);
+            ini_set('session.cookie_httponly', TRUE);
+            ini_set('session.cookie_samesite', $params['cookie_samesite']);
 		}
 		else
 		{
