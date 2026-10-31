@@ -190,13 +190,16 @@ class CI_Lang {
 	 */
 	public function line($line, $log_errors = TRUE)
 	{
+        if (in_array(gettype($line), ['array', 'object'])) {
+            return false;
+        }
 		$value = isset($this->language[$line]) ? $this->language[$line] : FALSE;
 
 		// Because killer robots like unicorns!
-		if ($value === FALSE && $log_errors === TRUE)
-		{
-			log_message('error', 'Could not find the language line "'.$line.'"');
-		}
+//		if ($value === FALSE && $log_errors === TRUE)
+//		{
+//			log_message('error', 'Could not find the language line "'.$line.'"');
+//		}
 
 		return $value;
 	}
