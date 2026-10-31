@@ -52,6 +52,8 @@ $lang['date_minute'] = 'Minute';
 $lang['date_minutes'] = 'Minutes';
 $lang['date_second'] = 'Second';
 $lang['date_seconds'] = 'Seconds';
+$lang['date_season'] = 'Season';
+$lang['date_seasons'] = 'Seasons';
 
 $lang['UM12']	= '(UTC -12:00) Baker/Howland Island';
 $lang['UM11']	= '(UTC -11:00) Niue';

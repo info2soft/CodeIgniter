@@ -42,4 +42,11 @@ $lang['terabyte_abbr'] = 'TB';
 $lang['gigabyte_abbr'] = 'GB';
 $lang['megabyte_abbr'] = 'MB';
 $lang['kilobyte_abbr'] = 'KB';
-$lang['bytes'] = 'Bytes';
+$lang['bytes'] = 'B';
+$lang['petabyte_abbr'] = 'PB';
+
+$lang['tebibyte_abbr'] = 'TiB';
+$lang['gibibyte_abbr'] = 'GiB';
+$lang['mebibyte_abbr'] = 'MiB';
+$lang['kibibyte_abbr'] = 'KiB';
+$lang['pebibyte_abbr'] = 'PiB';

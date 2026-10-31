@@ -110,7 +110,7 @@ if ( ! function_exists('form_open'))
 			}
 			else
 			{
-				$noise = mt_rand(-128, 127);
+				$noise = random_int(-128, 127);
 			}
 
 			// Prepend if $noise has a negative value, append if positive, do nothing for zero
@@ -887,11 +887,12 @@ if ( ! function_exists('form_error'))
 	 * @param	string
 	 * @param	string
 	 * @param	string
+	 * @param	string
 	 * @return	string
 	 */
-	function form_error($field = '', $prefix = '', $suffix = '')
+	function form_error($field = '', $prefix = '', $suffix = '', $key = 'form_validation')
 	{
-		if (FALSE === ($OBJ =& _get_validation_object()))
+		if (FALSE === ($OBJ =& _get_validation_object($key)))
 		{
 			return '';
 		}
@@ -912,11 +913,12 @@ if ( ! function_exists('validation_errors'))
 	 *
 	 * @param	string
 	 * @param	string
+	 * @param	string
 	 * @return	string
 	 */
-	function validation_errors($prefix = '', $suffix = '')
+	function validation_errors($prefix = '', $suffix = '', $key = 'form_validation')
 	{
-		if (FALSE === ($OBJ =& _get_validation_object()))
+		if (FALSE === ($OBJ =& _get_validation_object($key)))
 		{
 			return '';
 		}
@@ -1032,16 +1034,18 @@ if ( ! function_exists('_get_validation_object'))
 	 * Determines what the form validation class was instantiated as, fetches
 	 * the object and returns it.
 	 *
+     * @param string
 	 * @return	mixed
 	 */
-	function &_get_validation_object()
+	function &_get_validation_object($object = '')
 	{
 		$CI =& get_instance();
 
 		// We set this as a variable since we're returning by reference.
 		$return = FALSE;
 
-		if (FALSE !== ($object = $CI->load->is_loaded('Form_validation')))
+        !$object and $object = $CI->load->is_loaded('Form_validation');
+		if (FALSE !== $object)
 		{
 			if ( ! isset($CI->$object) OR ! is_object($CI->$object))
 			{

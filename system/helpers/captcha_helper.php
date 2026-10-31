@@ -227,7 +227,7 @@ if ( ! function_exists('create_captcha'))
 		{
 			for ($i = 0; $i < $word_length; $i++)
 			{
-				$word .= $pool[mt_rand(0, $rand_max)];
+				$word .= $pool[random_int(0, $rand_max)];
 			}
 		}
 		elseif ( ! is_string($word))
@@ -239,9 +239,9 @@ if ( ! function_exists('create_captcha'))
 		// Determine angle and position
 		// -----------------------------------
 		$length	= strlen($word);
-		$angle	= ($length >= 6) ? mt_rand(-($length-6), ($length-6)) : 0;
-		$x_axis	= mt_rand(6, (360/$length)-16);
-		$y_axis = ($angle >= 0) ? mt_rand($img_height, $img_width) : mt_rand(6, $img_height);
+		$angle	= ($length >= 6) ? random_int(-($length-6), ($length-6)) : 0;
+		$x_axis	= random_int(6, (360/$length)-16);
+		$y_axis = ($angle >= 0) ? random_int($img_height, $img_width) : random_int(6, $img_height);
 
 		// Create image
 		// PHP.net recommends imagecreatetruecolor(), but it isn't always available
@@ -296,13 +296,13 @@ if ( ! function_exists('create_captcha'))
 		if ($use_font === FALSE)
 		{
 			($font_size > 5) && $font_size = 5;
-			$x = mt_rand(0, $img_width / ($length / 3));
+			$x = random_int(0, $img_width / ($length / 3));
 			$y = 0;
 		}
 		else
 		{
 			($font_size > 30) && $font_size = 30;
-			$x = mt_rand(0, $img_width / ($length / 1.5));
+			$x = random_int(0, $img_width / ($length / 1.5));
 			$y = $font_size + 2;
 		}
 
@@ -310,13 +310,13 @@ if ( ! function_exists('create_captcha'))
 		{
 			if ($use_font === FALSE)
 			{
-				$y = mt_rand(0 , $img_height / 2);
+				$y = random_int(0 , $img_height / 2);
 				imagestring($im, $font_size, $x, $y, $word[$i], $colors['text']);
 				$x += ($font_size * 2);
 			}
 			else
 			{
-				$y = mt_rand($img_height / 2, $img_height - 3);
+				$y = random_int($img_height / 2, $img_height - 3);
 				imagettftext($im, $font_size, $angle, $x, $y, $colors['text'], $font_path, $word[$i]);
 				$x += $font_size;
 			}
