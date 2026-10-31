@@ -182,6 +182,50 @@ class CI_DB_pdo_mysql_forge extends CI_DB_pdo_forge {
 		return array($sql.implode(',', $field));
 	}
 
+    /**
+     * return table comment sql
+     *
+     * @param $table
+     * @param $comment
+     * @return string
+     */
+    public function _alter_table_comment($table, $comment)
+    {
+        return 'ALTER TABLE ' . $this->db->escape_identifiers($table) . ' COMMENT ' . $this->db->escape($comment);
+    }
+
+    /**
+     * return alter comment sql
+     *
+     * @param $table
+     * @param $field
+     * @param $comment
+     * @param $column_definition
+     * @return string
+     */
+    public function _alter_field_comment($table, $field, $comment, $column_definition)
+    {
+        $definition_str = " {$column_definition['type']} ";
+        if (!is_null($column_definition['default'])) {
+            is_string($column_definition['default']) and $column_definition['default'] = "'{$column_definition['default']}'";
+            $column_definition['default'] = str_replace('\\', '\\\\', $column_definition['default']); // 处理反斜线
+            $definition_str .= "DEFAULT {$column_definition['default']} ";
+        }
+
+        if (!$column_definition['null']) {
+            $definition_str .= 'NOT NULL ';
+        }
+
+        if (!empty($column_definition['extra'])) {
+            $definition_str .= "{$column_definition['extra']} ";
+        }
+
+        return 'ALTER TABLE ' . $this->db->escape_identifiers($table)
+            . ' MODIFY COLUMN ' . $this->db->escape_identifiers($field)
+            . $definition_str
+            . ' COMMENT ' . $this->db->escape($comment);
+    }
+
 	// --------------------------------------------------------------------
 
 	/**

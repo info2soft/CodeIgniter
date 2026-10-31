@@ -84,7 +84,7 @@ class CI_DB_mysql_utility extends CI_DB_utility {
 		}
 
 		// Extract the prefs for simplicity
-		extract($params);
+		extract($params, EXTR_SKIP);
 
 		// Build the output
 		$output = '';

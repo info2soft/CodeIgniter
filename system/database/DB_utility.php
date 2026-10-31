@@ -292,7 +292,7 @@ abstract class CI_DB_utility {
 		}
 
 		// Create variables for convenience
-		extract($params);
+		extract($params, EXTR_SKIP);
 
 		// Load the xml helper
 		get_instance()->load->helper('xml');

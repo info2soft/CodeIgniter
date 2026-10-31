@@ -61,6 +61,8 @@ abstract class CI_DB_forge {
 	 */
 	public $fields		= array();
 
+    public $comments    = array();
+
 	/**
 	 * Keys data
 	 *
@@ -362,6 +364,14 @@ abstract class CI_DB_forge {
 					$this->db->query($sqls[$i]);
 				}
 			}
+
+            if ( ! empty($this->comments) && method_exists($this, '_process_comments'))
+            {
+                for ($i = 0, $sqls = $this->_process_comments($table), $c = count($sqls); $i < $c; $i++)
+                {
+                    $this->db->query($sqls[$i]);
+                }
+            }
 		}
 
 		$this->_reset();
@@ -659,6 +669,48 @@ abstract class CI_DB_forge {
 		return TRUE;
 	}
 
+    /**
+     * Alter table comment
+     *
+     * @param $table
+     * @param $table_comment
+     * @return void
+     */
+    public function modify_table_comment($table, $table_comment)
+    {
+        if (!$this->db->table_exists($table) || !method_exists($this, '_alter_table_comment')) {
+            return;
+        }
+
+        $sql = $this->_alter_table_comment($table, $table_comment);
+        $this->db->query($sql);
+    }
+
+    /**
+     * Alter fields comment
+     *
+     * @param $table
+     * @param $fields_comment
+     * @return void
+     */
+    public function modify_fields_comment($table, $fields_comment)
+    {
+        if (!$this->db->table_exists($table) || !method_exists($this, '_alter_field_comment')) {
+            return;
+        }
+
+        $columns_data = $this->db->list_columns($table);
+        $columns_data = $columns_data ? array_column($columns_data, null, 'name') : [];
+        foreach ($fields_comment as $field => $comment) {
+            if (!array_key_exists($field, $columns_data)) {
+                continue;
+            }
+
+            $sql = $this->_alter_field_comment($table, $field, $comment, $columns_data[$field]);
+            $this->db->query($sql);
+        }
+    }
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -734,6 +786,29 @@ abstract class CI_DB_forge {
 				'auto_increment'	=> '',
 				'_literal'		=> FALSE
 			);
+			if (env('MIGRATE_REPLACE_SERIAL_TYPE')
+				&& isset($attributes['TYPE']) && in_array(strtolower($attributes['TYPE']), ['serial', 'bigserial'])
+			) {
+				$field['type'] = 'BIGINT AUTO_INCREMENT';
+			}
+
+			if (env('MIGRATE_REPLACE_CHARACTER')
+				&& isset($attributes['TYPE']) && in_array(strtoupper($attributes['TYPE']), ['CHARACTER', 'CHARACTER VARYING'])
+			) {
+				$field['type'] = 'VARCHAR';
+			}
+
+			if (env('MIGRATE_REPLACE_DOUBLE_PRECISION')
+				&& isset($attributes['TYPE']) && in_array(strtoupper($attributes['TYPE']), ['DOUBLE PRECISION'])
+			) {
+				$field['type'] = 'DOUBLE';
+			}
+
+			if (env('MIGRATE_REPLACE_TEXT')
+				&& isset($attributes['TYPE']) && in_array(strtoupper($attributes['TYPE']), ['TEXT'])
+			) {
+				$field['type'] = 'LONGTEXT';
+			}
 
 			isset($attributes['TYPE']) && $this->_attr_unsigned($attributes, $field);
 
@@ -772,7 +847,7 @@ abstract class CI_DB_forge {
 
 			if (isset($attributes['COMMENT']))
 			{
-				$field['comment'] = $this->db->escape($attributes['COMMENT']);
+				$this->comments[$field['name']] = $field['comment'] = $this->db->escape($attributes['COMMENT']);
 			}
 
 			if (isset($attributes['TYPE']) && ! empty($attributes['CONSTRAINT']))

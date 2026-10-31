@@ -292,6 +292,37 @@ class CI_DB_pdo_mysql_driver extends CI_DB_pdo_driver {
 
 	// --------------------------------------------------------------------
 
+    /**
+     * Show full columns
+     *
+     * @param $table
+     * @return mixed
+     */
+    public function list_columns($table)
+    {
+        if (false === ($sql = $this->_list_columns($table)))
+        {
+            return false;
+        }
+
+        $query = $this->query($sql);
+
+        $columns = [];
+        foreach ($query->result_array() as $row) {
+            $columns[] = [
+                'name' => $row['Field'],
+                'type' => $row['Type'],
+                'null' => $row['Null'] == 'YES',
+                'default' => $row['Default'],
+                'extra' => $row['Extra'],
+            ];
+        }
+
+        return $columns;
+    }
+
+    // --------------------------------------------------------------------
+
 	/**
 	 * Show column query
 	 *

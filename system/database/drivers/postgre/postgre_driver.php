@@ -155,7 +155,16 @@ class CI_DB_postgre_driver extends CI_DB {
 				return FALSE;
 			}
 
-			empty($this->schema) OR $this->simple_query('SET search_path TO '.$this->schema.',public');
+            if (! empty($this->schema))
+            {
+                if (strtolower(env('DB_PROD_TYPE_SPEC')) == CC_DB_TYPE_KINGBASE) {
+                    $this->simple_query('ALTER DATABASE ' . $this->database . ' SET search_path to ' . "{$this->database}, {$this->schema}, public, sys_catalog");
+                    $this->simple_query('ALTER USER ' . $this->username . ' SET search_path to ' . "{$this->schema}, public, sys_catalog");
+                    $this->simple_query('SET search_path TO '.$this->schema.',public, sys_catalog');
+                } else {
+                    $this->simple_query('SET search_path TO '.$this->schema.',public');
+                }
+            }
 		}
 
 		return $this->conn_id;
