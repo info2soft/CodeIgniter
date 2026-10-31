@@ -61,7 +61,7 @@ class CI_Log {
 	 *
 	 * @var	int
 	 */
-	protected $_file_permissions = 0644;
+	protected $_file_permissions = 0640;
 
 	/**
 	 * Level of logging
@@ -129,7 +129,7 @@ class CI_Log {
 		$this->_file_ext = (isset($config['log_file_extension']) && $config['log_file_extension'] !== '')
 			? ltrim($config['log_file_extension'], '.') : 'php';
 
-		file_exists($this->_log_path) OR mkdir($this->_log_path, 0755, TRUE);
+		file_exists($this->_log_path) OR mkdir($this->_log_path, 0700, TRUE);
 
 		if ( ! is_dir($this->_log_path) OR ! is_really_writable($this->_log_path))
 		{
@@ -175,6 +175,8 @@ class CI_Log {
 			return FALSE;
 		}
 
+		$msg = str_replace(["\n", "\r"], ["\\n", "\\r"], $msg);
+
 		$level = strtoupper($level);
 
 		if (( ! isset($this->_levels[$level]) OR ($this->_levels[$level] > $this->_threshold))
@@ -196,7 +198,14 @@ class CI_Log {
 			}
 		}
 
-		if ( ! $fp = @fopen($filepath, 'ab'))
+		// Narrow the umask window to fopen() only: the log file/skeleton must be
+		// created with restrictive permissions, but the process-wide umask must
+		// not stay altered for the rest of the write (or leak on any early exit).
+		$old = @umask(0037);
+		$fp = @fopen($filepath, 'ab');
+		umask($old);
+
+		if ( ! $fp)
 		{
 			return FALSE;
 		}
