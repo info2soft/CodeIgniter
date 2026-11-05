@@ -1194,7 +1194,10 @@ class CI_Form_validation {
             }
         }
 
-        return $this->in_list(mb_strlen($str), $vales);
+        $length = (MB_ENABLED === TRUE) ? mb_strlen($str) : strlen($str);
+
+        // in_list() compares strictly, and explode() yields strings
+        return $this->in_list((string) $length, $vales);
 	}
 
 	// --------------------------------------------------------------------
