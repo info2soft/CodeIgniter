@@ -65,13 +65,16 @@ class CI_DB_postgre_utility extends CI_DB_utility {
 
 	// --------------------------------------------------------------------
 
-    public function __construct(&$db)
-    {
-        if (env('DB_PROD_TYPE', 'pgsql') == 'qianbase') {
-            $this->_list_databases = 'SELECT datname FROM qb_database';
-        }
-        parent::__construct($db);
-    }
+	public function __construct(&$db)
+	{
+		parent::__construct($db);
+
+		// QianBase exposes its database list in qb_database
+		if ($this->db->qianbase)
+		{
+			$this->_list_databases = 'SELECT datname FROM qb_database';
+		}
+	}
 
     /**
 	 * Export

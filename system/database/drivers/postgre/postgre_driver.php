@@ -67,6 +67,27 @@ class CI_DB_postgre_driver extends CI_DB {
 	 */
 	public $schema = 'public';
 
+	/**
+	 * QianBase cluster flag
+	 *
+	 * QianBase keeps the database list in qb_database instead of pg_database.
+	 * Declared as a connection parameter, e.g. $db['default']['qianbase'] = TRUE;
+	 *
+	 * @var	bool
+	 */
+	public $qianbase = FALSE;
+
+	/**
+	 * KingBase cluster flag
+	 *
+	 * KingBase persists the search_path at the database and user level
+	 * (ALTER DATABASE / ALTER USER) and accepts sys_catalog.
+	 * Declared as a connection parameter, e.g. $db['default']['kingbase'] = TRUE;
+	 *
+	 * @var	bool
+	 */
+	public $kingbase = FALSE;
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -157,13 +178,16 @@ class CI_DB_postgre_driver extends CI_DB {
 
             if (! empty($this->schema))
             {
-                if (strtolower(env('DB_PROD_TYPE_SPEC')) == CC_DB_TYPE_KINGBASE) {
-                    $this->simple_query('ALTER DATABASE ' . $this->database . ' SET search_path to ' . "{$this->database}, {$this->schema}, public, sys_catalog");
-                    $this->simple_query('ALTER USER ' . $this->username . ' SET search_path to ' . "{$this->schema}, public, sys_catalog");
-                    $this->simple_query('SET search_path TO '.$this->schema.',public, sys_catalog');
-                } else {
-                    $this->simple_query('SET search_path TO '.$this->schema.',public');
-                }
+				if ($this->kingbase)
+				{
+					$this->simple_query('ALTER DATABASE ' . $this->database . ' SET search_path to ' . "{$this->database}, {$this->schema}, public, sys_catalog");
+					$this->simple_query('ALTER USER ' . $this->username . ' SET search_path to ' . "{$this->schema}, public, sys_catalog");
+					$this->simple_query('SET search_path TO '.$this->schema.',public, sys_catalog');
+				}
+				else
+				{
+					$this->simple_query('SET search_path TO '.$this->schema.',public');
+				}
             }
 		}
 
