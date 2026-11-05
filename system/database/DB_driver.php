@@ -356,6 +356,8 @@ abstract class CI_DB_driver {
 	 */
 	protected $_count_string = 'SELECT COUNT(*) AS ';
 
+	protected $tenant; // 租户名
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -1057,7 +1059,15 @@ abstract class CI_DB_driver {
 		}
 		elseif (is_string($str) OR (is_object($str) && method_exists($str, '__toString')))
 		{
-			return "'".$this->escape_str($str)."'";
+            $str = "'".$this->escape_str($str)."'";
+
+            if (($this->dbdriver == 'postgre' || $this->subdriver == 'pgsql')
+                && strpos(ltrim($str), 'E\'') !== 0 && strpos($str, '\\') !== FALSE
+            ) {
+                $str = 'E' . str_replace('\\', '\\\\', $str);
+            }
+
+            return $str;
 		}
 		elseif (is_bool($str))
 		{
@@ -1293,6 +1303,40 @@ abstract class CI_DB_driver {
 
 		return $fields;
 	}
+
+    /**
+     * list column meta data
+     *
+     * @param $table
+     * @return mixed
+     */
+    public function list_columns($table)
+    {
+        if (false === ($sql = $this->_list_columns($table)))
+        {
+            return false;
+        }
+
+        $query = $this->query($sql);
+
+        $columns = [];
+        foreach ($query->result_array() as $row) {
+            // 此处逻辑同list_fields()
+            if (!isset($key)) {
+                if (isset($row['column_name'])) {
+                    $key = 'column_name';
+                } elseif (isset($row['COLUMN_NAME'])) {
+                    $key = 'COLUMN_NAME';
+                } else {
+                    $key = key($row);
+                }
+            }
+
+            $columns[] = ['name' => $row[$key],];
+        }
+
+        return $columns;
+    }
 
 	// --------------------------------------------------------------------
 

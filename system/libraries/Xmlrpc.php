@@ -351,7 +351,7 @@ class CI_Xmlrpc {
 	 * @param	int	$proxy_port
 	 * @return	void
 	 */
-	public function server($url, $port = 80, $proxy = FALSE, $proxy_port = 8080)
+	public function server($url, $port = 80, $proxy = FALSE, $proxy_port = 8080, $protocol = 'tcp')
 	{
 		if (stripos($url, 'http') !== 0)
 		{
@@ -359,6 +359,10 @@ class CI_Xmlrpc {
 		}
 
 		$parts = parse_url($url);
+
+        if ($parts['scheme'] == 'https' && $protocol == 'tcp') {
+            $protocol = 'ssl';
+        }
 
 		if (isset($parts['user'], $parts['pass']))
 		{
@@ -372,7 +376,7 @@ class CI_Xmlrpc {
 			$path .= '?'.$parts['query'];
 		}
 
-		$this->client = new XML_RPC_Client($path, $parts['host'], $port, $proxy, $proxy_port);
+		$this->client = new XML_RPC_Client($path, $parts['host'], $port, $proxy, $proxy_port, $protocol);
 	}
 
 	// --------------------------------------------------------------------
@@ -572,6 +576,13 @@ class XML_RPC_Client extends CI_Xmlrpc
 	public $path			= '';
 
 	/**
+	 * Server protocol
+	 *
+	 * @var	string
+	 */
+	public $protocol	    = 'tcp';
+
+	/**
 	 * Server hostname
 	 *
 	 * @var	string
@@ -654,11 +665,15 @@ class XML_RPC_Client extends CI_Xmlrpc
 	 * @param	int	$proxy_port
 	 * @return	void
 	 */
-	public function __construct($path, $server, $port = 80, $proxy = FALSE, $proxy_port = 8080)
+	public function __construct($path, $server, $port = 80, $proxy = FALSE, $proxy_port = 8080, $protocol = 'tcp')
 	{
 		parent::__construct();
 
-		$url = parse_url('http://'.$server);
+        if (stripos($server, '://') === false)
+        {
+            $url = '//'.$server;
+        }
+        $url = parse_url($url);
 
 		if (isset($url['user'], $url['pass']))
 		{
@@ -668,6 +683,7 @@ class XML_RPC_Client extends CI_Xmlrpc
 
 		$this->port = $port;
 		$this->server = $url['host'];
+        $this->protocol = $protocol;
 		$this->path = $path;
 		$this->proxy = $proxy;
 		$this->proxy_port = $proxy_port;
@@ -713,7 +729,17 @@ class XML_RPC_Client extends CI_Xmlrpc
 			$port = $this->proxy_port;
 		}
 
-		$fp = @fsockopen($server, $port, $this->errno, $this->errstring, $this->timeout);
+        // ini_set('openssl.cafile', '/usr/cntlcenter/etc/certs/i2.pem');
+        $options = [
+            'ssl' => [
+                'verify_peer'       => false,
+                'verify_peer_name'  => false,
+                'allow_self_signed' => true,
+            ]
+        ];
+        $ctx = stream_context_create($this->protocol != 'tcp' ? $options : []);
+        $fp = @stream_socket_client("{$this->protocol}://{$server}:{$port}", $this->errno, $this->errstring, $this->timeout, STREAM_CLIENT_CONNECT, $ctx);
+//		$fp = fsockopen($server, $port, $this->errno, $this->errstring, $this->timeout);
 
 		if ( ! is_resource($fp))
 		{

@@ -69,3 +69,7 @@ $lang['form_validation_greater_than']		= 'The {field} field must contain a numbe
 $lang['form_validation_greater_than_equal_to']	= 'The {field} field must contain a number greater than or equal to {param}.';
 $lang['form_validation_error_message_not_set']	= 'Unable to access an error message corresponding to your field name {field}.';
 $lang['form_validation_in_list']		= 'The {field} field must be one of: {param}.';
+$lang['form_validation_is_bool']        = 'The {field} field must be of type Boolean';
+$lang['form_validation_valid_phone']    = 'The {field} field must contain a valid phone number';
+$lang['form_validation_valid_phones']   = 'The {field} field must contain all valid phone number';
+$lang['form_validation_csr_file']   = 'The {field} field must contain the correct PEM-encoded CSR';

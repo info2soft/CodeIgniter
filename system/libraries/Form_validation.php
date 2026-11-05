@@ -1061,6 +1061,19 @@ class CI_Form_validation {
 			: (trim((string) $str) !== '');
 	}
 
+    // --------------------------------------------------------------------
+
+    /**
+     * check_empty
+     *
+     * @param	string
+     * @return	bool
+     */
+    public function check_empty($str)
+    {
+        return true;
+    }
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -1172,14 +1185,17 @@ class CI_Form_validation {
 	 * @param	string
 	 * @return	bool
 	 */
-	public function exact_length($str, $val)
+	public function exact_length($str, $vales)
 	{
-		if ( ! is_numeric($val))
-		{
-			return FALSE;
-		}
+        foreach (explode(',', $vales) as $val)
+        {
+            if ( ! is_numeric($val))
+            {
+                return FALSE;
+            }
+        }
 
-		return (mb_strlen($str) === (int) $val);
+        return $this->in_list(mb_strlen($str), $vales);
 	}
 
 	// --------------------------------------------------------------------

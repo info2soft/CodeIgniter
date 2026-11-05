@@ -142,7 +142,17 @@ class CI_DB_pdo_driver extends CI_DB {
 
 		try
 		{
-			return new PDO($this->dsn, $this->username, $this->password, $this->options);
+			// 兼容ob租户模式
+			if (env('DB_PROD_TYPE') == CC_DB_TYPE_MYSQL && env('DB_PROD_TYPE_SPEC') == CC_DB_TYPE_OCEANBASE) {
+                if ($this->tenant) {
+                    $username = $this->username . '@' . $this->tenant;
+                } else {
+                    $username = $this->username;
+                }
+			} else {
+				$username = $this->username;
+			}
+			return new PDO($this->dsn, $username, $this->password, $this->options);
 		}
 		catch (PDOException $e)
 		{
@@ -301,6 +311,11 @@ class CI_DB_pdo_driver extends CI_DB {
 	public function error()
 	{
 		$error = array('code' => '00000', 'message' => '');
+        if ( ! $this->conn_id) {
+            $error['message'] = 'Unable to connect to the database';
+            log_message('error', "DSN: {$this->dsn}, HOST: {$this->hostname}");
+            return $error;
+        }
 		$pdo_error = $this->conn_id->errorInfo();
 
 		if (empty($pdo_error[0]))

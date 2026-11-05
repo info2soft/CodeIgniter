@@ -164,6 +164,34 @@ class CI_DB_pdo_pgsql_forge extends CI_DB_pdo_forge {
 		return $sqls;
 	}
 
+    /**
+     * return table comment sql
+     *
+     * @param $table
+     * @param $comment
+     * @return string
+     */
+    public function _alter_table_comment($table, $comment)
+    {
+        return 'COMMENT ON TABLE ' . $this->db->escape_identifiers($table) . ' IS ' . $this->db->escape($comment);
+    }
+
+    /**
+     * return field comment sql
+     *
+     * @param $table
+     * @param $field
+     * @param $comment
+     * @param $column_definition
+     * @return string
+     */
+    public function _alter_field_comment($table, $field, $comment, $column_definition)
+    {
+        return 'COMMENT ON COLUMN '
+            . $this->db->escape_identifiers($table) . '.' . $this->db->escape_identifiers($field)
+            . ' IS ' . $this->db->escape($comment);
+    }
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -215,4 +243,21 @@ class CI_DB_pdo_pgsql_forge extends CI_DB_pdo_forge {
 		}
 	}
 
+    protected function _process_comments($table)
+    {
+        $sqls = [];
+        if (!empty($this->comments)) {
+            foreach ($this->comments as $field => $comment) {
+                if (!isset($this->fields[$field])) {
+                    unset($this->comments[$field]);
+                    continue;
+                }
+
+                $sqls[] = 'COMMENT ON COLUMN '
+                    . $this->db->escape_identifiers($table).'.'.$this->db->escape_identifiers($field)
+                    . ' IS ' . $comment;
+            }
+        }
+        return $sqls;
+    }
 }

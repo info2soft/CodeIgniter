@@ -119,7 +119,12 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 
 		if (is_object($this->conn_id) && ! empty($this->schema))
 		{
-			$this->simple_query('SET search_path TO '.$this->schema.',public');
+			if (strtolower(env('DB_PROD_TYPE_SPEC')) == CC_DB_TYPE_KINGBASE) {
+				$this->simple_query('ALTER DATABASE ' . $this->database . ' SET search_path to ' . "{$this->database}, {$this->schema}, public, sys_catalog");
+				$this->simple_query('ALTER USER ' . $this->username . ' SET search_path to ' . "{$this->schema}, public, sys_catalog");
+			} else {
+				$this->simple_query('SET search_path TO '.$this->schema.',public');
+			}
 		}
 
 		return $this->conn_id;

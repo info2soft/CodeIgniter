@@ -635,3 +635,37 @@ if ( ! function_exists('date_range'))
 		return $range;
 	}
 }
+
+
+if (!function_exists('seconds_to_human')) {
+    /**
+     * 秒数转换
+     *
+     * @param int $seconds : 秒数
+     * @return string 转化后的时间
+     */
+    function seconds_to_human($seconds)
+    {
+        if ($seconds == 0) {
+            return '≈0' . lang('date_seconds');
+        }
+        $days = floor($seconds / 86400);
+        $hours = floor(($seconds % 86400) / 3600);
+        $minutes = floor(($seconds % 3600) / 60);
+        $seconds = $seconds % 60;
+        $res = '';
+        if ($days) {
+            $res .= $days . lang('date_days');
+        }
+        if ($hours) {
+            $res .= $hours . lang('date_hours');
+        }
+        if ($minutes) {
+            $res .= $minutes . lang('date_minutes');
+        }
+        if ($seconds) {
+            $res .= $seconds . lang('date_seconds');
+        }
+        return $res;
+    }
+}

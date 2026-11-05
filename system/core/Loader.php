@@ -969,7 +969,7 @@ class CI_Loader {
 		}
 
 		array_push($this->_ci_load_vars_stack, $_ci_vars);
-		extract($_ci_vars);
+		extract($_ci_vars, EXTR_SKIP);
 
 		/**
 		 * Buffer the output
