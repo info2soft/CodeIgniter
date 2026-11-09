@@ -1008,6 +1008,150 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 	// --------------------------------------------------------------------
 
 	/**
+     * ILIKE
+     *
+     * Generates a %ILIKE% portion of the query.
+     * Separates multiple calls with 'AND'.
+     *
+     * @param   mixed   $field
+     * @param   string  $match
+     * @param   string  $side
+     * @param   bool    $escape
+     * @return  CI_DB_query_builder
+     */
+	public function ilike($field, $match = '', $side = 'both', $escape = null)
+	{
+		return $this->_ilike($field, $match, 'AND ', $side, '', $escape);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * NOT ILIKE
+     *
+     * Generates a NOT ILIKE portion of the query.
+     * Separates multiple calls with 'AND'.
+     *
+     * @param   mixed   $field
+     * @param   string  $match
+     * @param   string  $side
+     * @param   bool    $escape
+     * @return  CI_DB_query_builder
+     */
+	public function not_ilike($field, $match = '', $side = 'both', $escape = null)
+	{
+		return $this->_ilike($field, $match, 'AND ', $side, 'NOT', $escape);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * OR ILIKE
+     *
+     * Generates a %LIKE% portion of the query.
+     * Separates multiple calls with 'OR'.
+     *
+     * @param   mixed   $field
+     * @param   string  $match
+     * @param   string  $side
+     * @param   bool    $escape
+     * @return  CI_DB_query_builder
+     */
+	public function or_ilike($field, $match = '', $side = 'both', $escape = null)
+	{
+		return $this->_ilike($field, $match, 'OR ', $side, '', $escape);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * OR NOT LIKE
+     *
+     * Generates a NOT ILIKE portion of the query.
+     * Separates multiple calls with 'OR'.
+     *
+     * @param   mixed   $field
+     * @param   string  $match
+     * @param   string  $side
+     * @param   bool    $escape
+     * @return  CI_DB_query_builder
+     */
+	public function or_not_ilike($field, $match = '', $side = 'both', $escape = null)
+	{
+		return $this->_ilike($field, $match, 'OR ', $side, 'NOT', $escape);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+     * Internal ILIKE
+     *
+     * @used-by ilike()
+     * @used-by or_ilike()
+     * @used-by not_ilike()
+     * @used-by or_not_ilike()
+     *
+     * @param $field
+     * @param string $match
+     * @param string $type
+     * @param string $side
+     * @param string $not
+     * @param null $escape
+     * @return $this
+     */
+	protected function _ilike($field, $match = '', $type = 'AND ', $side = 'both', $not = '', $escape = null)
+	{
+		if (! is_array($field)) {
+			$field = array($field => $match);
+		}
+
+		is_bool($escape) or $escape = $this->_protect_identifiers;
+		// lowercase $side in case somebody writes e.g. 'BEFORE' instead of 'before' (doh)
+		$side = strtolower($side);
+
+		foreach ($field as $k => $v) {
+			$prefix = (count($this->qb_where) === 0 && count($this->qb_cache_where) === 0)
+				? $this->_group_get_type('') : $this->_group_get_type($type);
+
+			if ($escape === true) {
+				$v = $this->escape_like_str($v);
+			}
+
+			switch ($side) {
+				case 'none':
+					$v = "'{$v}'";
+					break;
+				case 'before':
+					$v = "'%{$v}'";
+					break;
+				case 'after':
+					$v = "'{$v}%'";
+					break;
+				case 'both':
+				default:
+					$v = "'%{$v}%'";
+					break;
+			}
+
+			// some platforms require an escape sequence definition for LIKE wildcards
+			if ($escape === true && $this->_like_escape_str !== '') {
+				$v .= sprintf($this->_like_escape_str, $this->_like_escape_chr);
+			}
+
+			$qb_where = array('condition' => "{$prefix} {$k} {$not} ILIKE {$v}", 'value' => null, 'escape' => $escape);
+			$this->qb_where[] = $qb_where;
+			if ($this->qb_caching === true) {
+				$this->qb_cache_where[] = $qb_where;
+				$this->qb_cache_exists[] = 'where';
+			}
+		}
+
+		return $this;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Starts a query group.
 	 *
 	 * @param	string	$not	(Internal use only)
