@@ -808,6 +808,11 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 			return $this;
 		}
 
+		if (is_array($values) && count($values) === 0)
+		{
+			return $this;
+		}
+
 		if ( ! is_array($values))
 		{
 			$values = array($values);
