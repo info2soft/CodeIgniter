@@ -16,18 +16,23 @@ class Log_test extends CI_TestCase {
 		$enabled    = new ReflectionProperty('CI_Log', '_enabled');
 		$enabled->setAccessible(TRUE);
 
-		$this->ci_set_config('log_path', $this->ci_readonly_dir->url());
+		// CI_Log creates the log directory when it is missing. '/root/' is
+		// unwritable on POSIX, but on Windows it maps to the current drive root
+		// and can be created, so use a path that cannot be created there.
+		$unwritable = (DIRECTORY_SEPARATOR === '\\') ? str_repeat('x', 300).'/' : '/root/';
+
+		$this->ci_set_config('log_path', $unwritable);
 		$this->ci_set_config('log_threshold', 'z');
 		$this->ci_set_config('log_date_format', 'd.m.Y');
 		$this->ci_set_config('log_filename', '');
 		$this->ci_set_config('log_file_permissions', '');
 		$instance = new CI_Log();
 
-		$this->assertNotFalse(strpos($path->getValue($instance), 'application/readonly'));
+		$this->assertEquals($path->getValue($instance), $unwritable);
 		$this->assertEquals($threshold->getValue($instance), 1);
 		$this->assertEquals($date_fmt->getValue($instance), 'd.m.Y');
-		$this->assertEquals($filename->getValue($instance), 'log-'.date('Y-m-d').'.php');
-		$this->assertEquals($file_perms->getValue($instance), 0644);
+		$this->assertEquals($file_ext->getValue($instance), 'php');
+		$this->assertEquals($file_perms->getValue($instance), 0640);
 		$this->assertFalse($enabled->getValue($instance));
 
 		$this->ci_set_config('log_path', '');

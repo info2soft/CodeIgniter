@@ -27,37 +27,37 @@ class Number_helper_test extends CI_TestCase {
 
 	public function test_byte_format()
 	{
-		$this->assertEquals('456 Bytes', byte_format(456));
+		$this->assertEquals('456 B', byte_format(456));
 	}
 
 	public function test_kb_format()
 	{
-		$this->assertEquals('4.5 KB', byte_format(4567));
+		$this->assertEquals('4.5 KiB', byte_format(4567));
 	}
 
 	public function test_kb_format_medium()
 	{
-		$this->assertEquals('44.6 KB', byte_format(45678));
+		$this->assertEquals('44.6 KiB', byte_format(45678));
 	}
 
 	public function test_kb_format_large()
 	{
-		$this->assertEquals('446.1 KB', byte_format(456789));
+		$this->assertEquals('446.1 KiB', byte_format(456789));
 	}
 
 	public function test_mb_format()
 	{
-		$this->assertEquals('3.3 MB', byte_format(3456789));
+		$this->assertEquals('3.3 MiB', byte_format(3456789));
 	}
 
 	public function test_gb_format()
 	{
-		$this->assertEquals('1.8 GB', byte_format(1932735283.2));
+		$this->assertEquals('1.8 GiB', byte_format(1932735283.2));
 	}
 
 	public function test_tb_format()
 	{
-		$this->assertEquals('112,283.3 TB', byte_format(123456789123456789));
+		$this->assertEquals('109.7 PiB', byte_format(123456789123456789));
 	}
 
 }

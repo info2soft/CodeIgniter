@@ -67,6 +67,17 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 	 */
 	public $schema = 'public';
 
+	/**
+	 * KingBase cluster flag
+	 *
+	 * KingBase persists the search_path at the database and user level
+	 * (ALTER DATABASE / ALTER USER) and accepts sys_catalog.
+	 * Declared as a connection parameter, e.g. $db['default']['kingbase'] = TRUE;
+	 *
+	 * @var	bool
+	 */
+	public $kingbase = FALSE;
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -119,10 +130,13 @@ class CI_DB_pdo_pgsql_driver extends CI_DB_pdo_driver {
 
 		if (is_object($this->conn_id) && ! empty($this->schema))
 		{
-			if (strtolower(env('DB_PROD_TYPE_SPEC')) == CC_DB_TYPE_KINGBASE) {
+			if ($this->kingbase)
+			{
 				$this->simple_query('ALTER DATABASE ' . $this->database . ' SET search_path to ' . "{$this->database}, {$this->schema}, public, sys_catalog");
 				$this->simple_query('ALTER USER ' . $this->username . ' SET search_path to ' . "{$this->schema}, public, sys_catalog");
-			} else {
+			}
+			else
+			{
 				$this->simple_query('SET search_path TO '.$this->schema.',public');
 			}
 		}

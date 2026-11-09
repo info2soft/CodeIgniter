@@ -51,7 +51,7 @@ class Lang_test extends CI_TestCase {
 		$this->ci_vfs_clone('system/language/english/number_lang.php');
 		$this->ci_vfs_clone('system/language/english/number_lang.php', 'system/language/123funny/');
 		$this->assertTrue($this->lang->load('number', '123funny'));
-		$this->assertEquals('Bytes', $this->lang->language['bytes']);
+		$this->assertEquals('B', $this->lang->language['bytes']);
 
 		// test without existing file
 		$this->ci_vfs_clone('system/language/english/email_lang.php');

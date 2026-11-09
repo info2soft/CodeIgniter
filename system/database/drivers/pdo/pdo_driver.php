@@ -143,12 +143,8 @@ class CI_DB_pdo_driver extends CI_DB {
 		try
 		{
 			// 兼容ob租户模式
-			if (env('DB_PROD_TYPE') == CC_DB_TYPE_MYSQL && env('DB_PROD_TYPE_SPEC') == CC_DB_TYPE_OCEANBASE) {
-                if ($this->tenant) {
-                    $username = $this->username . '@' . $this->tenant;
-                } else {
-                    $username = $this->username;
-                }
+			if ($this->tenant) {
+				$username = $this->username . '@' . $this->tenant;
 			} else {
 				$username = $this->username;
 			}
